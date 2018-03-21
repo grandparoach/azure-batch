@@ -1,0 +1,86 @@
+{
+    "parameters": {
+      "vmSize": {
+        "type": "string",
+        "defaultValue": "<<_VM_SIZE_>>",
+        "metadata": {
+          "description": "The size of the Batch nodes"
+        }
+      },
+      "vmId": {
+        "type": "string",
+        "defaultValue": "/subscriptions/<_ID_>/resourceGroups/<_RG_>/providers/Microsoft.Compute/images/<_IMAGE_>",
+        "metadata": {
+          "description": "ID of the custom image that will be used for compute nodes in the pool"
+        }
+      },
+      "autoScaleFormula": {
+        "type": "string",
+        "defaultValue": "// This is another example that adjusts the pool size based on the number of tasks. This formula also takes into account the MaxTasksPerComputeNode value that has been set for the pool. This is particularly useful in situations where parallel task execution has been enabled on your pool.\n\n// Determine whether 70 percent of the samples have been recorded in the past 15 minutes; if not, use last sample\npercentage = 70;\nspan = TimeInterval_Minute * 15;\n$samples = $ActiveTasks.GetSamplePercent(span);\n$tasks = $samples < percentage ? max(0,$ActiveTasks.GetSample(1)) : max( $ActiveTasks.GetSample(1), avg($ActiveTasks.GetSample(span)));\n// Set the number of nodes to add to one-fourth the number of active tasks (the MaxTasksPerComputeNode property on this pool is set to 4, adjust this number for your use case)\nmultiplier = 0.25;\n$cores = $TargetDedicated * 4;\n$extraVMs = (($tasks - $cores) + 3) * multiplier;\n$targetVMs = ($TargetDedicated + $extraVMs);\n// Attempt to grow the number of compute nodes to match the number of active tasks, with a maximum of 3\n$TargetDedicated = max(0, min($targetVMs, 3));\n// Keep the nodes active until the tasks finish\n$NodeDeallocationOption = taskcompletion;",
+        "metadata": {
+          "description": "The formula used for autoscaling the compute pool"
+        }
+      },
+      "maxTasksPerNode": {
+        "type": "int",
+        "defaultValue": 8,
+        "metadata": {
+          "description": "The number of tasks that will be assigned to each compute node"
+        }
+      },
+      "poolId": {
+        "type": "string",
+        "defaultValue": "<<_POOL_NAME_>>",
+        "metadata": {
+          "description": "The name of the pool being created"
+        }
+      },
+      "startTask": {
+        "type": "string",
+        "defaultValue": "/bin/bash -c 'run task here or /run/task/here.sh",
+        "metadata": {
+          "description": "The task that will be run on all nodes joining the pool"
+        }
+      }
+    },
+    "pool": {
+      "type": "Microsoft.Batch/batchAccounts/pools",
+      "properties": {
+        "id": "[parameters('poolId')]",
+        "virtualMachineConfiguration": {
+          "imageReference": {
+            "virtualMachineImageId": "[parameters('vmId')]"
+          },
+          "nodeAgentSKUId": "batch.node.centos 7"
+        },
+        "vmSize": "[parameters('vmSize')]",
+        "nodeFillType": "pack",
+        "enableAutoScale": true,
+        "autoScaleFormula": "[parameters('autoScaleFormula')]",
+        "autoScaleEvaluationInterval": "PT5M",
+        "maxTasksPerNode": 8,
+        "interNodeCommunication": false,
+        "networkConfiguration": {
+          "subnetId": "/subscriptions/ed4e9e4f-9d3d-450e-8733-28a7d81cc5a4/resourceGroups/lustretest02/providers/Microsoft.Network/virtualNetworks/lustre-vnet/subnets/subnet-lustre-clients"
+        }
+      },
+      "startTask": {
+        "commandLine": "[parameters('startTask')]",
+        "resourceFiles": [],
+        "environmentSettings": [
+          {
+            "name": "<<_ENV_VAR_>>",
+            "value": "<<_ENV_VAR_VALUE_>>"
+          },
+        ],
+        "userIdentity": {
+          "autoUser": {
+            "scope": "pool",
+            "elevationLevel": "admin"
+          }
+        },
+        "maxTaskRetryCount": 0,
+        "waitForSuccess": true
+      }
+    }
+  }

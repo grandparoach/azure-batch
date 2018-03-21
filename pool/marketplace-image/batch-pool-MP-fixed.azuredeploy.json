@@ -1,0 +1,86 @@
+{
+    "parameters": {
+	      "vmSize": {
+	      "type": "string",
+	      "defaultValue": "<<_VM_SIZE_>>",
+	      "metadata": {
+		        "description": "The size of the Batch nodes"
+	    	}
+	  },
+        "dedicatedNodeCount": {
+            "type": "int",
+	          "defaultValue": 0,
+            "metadata": {
+                "description": "The number of dedicated pool nodes"
+            }
+        },
+	      "lowPriNodeCount": {
+            "type": "int",
+            "defaultValue": 0,
+            "metadata": {
+                "description": "The number of Low Priority pool nodes"
+            }
+        },
+      	"maxTasksPerNode": {
+      	    "type": "int",
+      	    "defaultValue": 0,
+      	    "metadata": {
+      		      "description": "The number of tasks that will be assigned to each compute node"
+      	    }
+      	},
+        "poolId": {
+            "type": "string",
+	          "defaultValue": "<<_POOL_NAME_>>",
+            "metadata": {
+                "description": "The name of the pool being created"
+            }
+        },
+        "startTask": {
+            "type": "string",
+            "defaultValue": "/bin/bash -c 'run task here or /run/task/here.sh'",
+            "metadata": {
+                "description": "The task that will be run on all nodes joining the pool"
+            }
+        }
+    },
+    "pool": {
+        "type": "Microsoft.Batch/batchAccounts/pools",
+        "properties": {
+            "id": "[parameters('poolId')]",
+            "virtualMachineConfiguration": {
+                "imageReference": {
+                    "publisher": "OpenLogic",
+                    "offer": "CentOS",
+                    "sku": "7.4",
+                    "version": "latest"
+                },
+                "nodeAgentSKUId": "batch.node.centos 7"
+            },
+            "vmSize": "[parameters('vmSize')]",
+            "targetDedicatedNodes": "[parameters('dedicatedNodeCount')]",
+            "targetLowPriorityNodes": "[parameters('lowPriNodeCount')]",
+	          "nodeFillType": "pack",
+            "enableAutoScale": false,
+            "maxTasksPerNode": "[parameters('maxTasksPerNode')]",
+	          "interNodeCommunication": false
+            },
+        "startTask": {
+            "commandLine": "[parameters('startTask')]",
+            "resourceFiles": [],
+            "environmentSettings": [
+              {
+                "name": "<<_ENV_VAR_>>",
+                "value": "<<_VALUE_>>"
+              },
+            ],
+            "userIdentity": {
+                "autoUser": {
+                    "scope": "pool",
+                    "elevationLevel": "admin"
+                }
+            },
+        "maxTaskRetryCount": 0,
+        "waitForSuccess": true
+        }
+    } 
+}

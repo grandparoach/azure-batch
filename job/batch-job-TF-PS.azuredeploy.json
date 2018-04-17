@@ -16,7 +16,7 @@
                     }
                 ],
                 "repeatTask": {
-                  "commandLine": "/bin/bash -c 'run task here or /run/task/here.sh'"
+                  "commandLine": "/bin/bash -c 'run task here or /run/task-{0}/here.sh'"
                 }
             }
         }

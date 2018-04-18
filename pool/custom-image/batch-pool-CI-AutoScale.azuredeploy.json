@@ -34,13 +34,6 @@
         "metadata": {
           "description": "The name of the pool being created"
         }
-      },
-      "startTask": {
-        "type": "string",
-        "defaultValue": "/bin/bash -c 'run task here or /run/task/here.sh",
-        "metadata": {
-          "description": "The task that will be run on all nodes joining the pool"
-        }
       }
     },
     "pool": {
@@ -51,7 +44,7 @@
           "imageReference": {
             "virtualMachineImageId": "[parameters('vmId')]"
           },
-          "nodeAgentSKUId": "batch.node.centos 7"
+          "nodeAgentSKUId": "batch.node.<<_BATCH_NODE_AGENT_SKU_>>"
         },
         "vmSize": "[parameters('vmSize')]",
         "nodeFillType": "pack",
@@ -61,26 +54,8 @@
         "maxTasksPerNode": 8,
         "interNodeCommunication": false,
         "networkConfiguration": {
-          "subnetId": "/subscriptions/ed4e9e4f-9d3d-450e-8733-28a7d81cc5a4/resourceGroups/lustretest02/providers/Microsoft.Network/virtualNetworks/lustre-vnet/subnets/subnet-lustre-clients"
-        }
-      },
-      "startTask": {
-        "commandLine": "[parameters('startTask')]",
-        "resourceFiles": [],
-        "environmentSettings": [
-          {
-            "name": "<<_ENV_VAR_>>",
-            "value": "<<_ENV_VAR_VALUE_>>"
-          },
-        ],
-        "userIdentity": {
-          "autoUser": {
-            "scope": "pool",
-            "elevationLevel": "admin"
-          }
-        },
-        "maxTaskRetryCount": 0,
-        "waitForSuccess": true
+          "subnetId": "<<_SUBNET_ID_>>"
       }
     }
   }
+}

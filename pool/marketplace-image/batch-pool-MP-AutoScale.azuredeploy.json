@@ -2,7 +2,7 @@
     "parameters": {
 	      "vmSize": {
 	          "type": "string",
-      	    "defaultValue": "Standard_F2",
+      	    "defaultValue": "<<_VM_SIZE_>>",
       	    "metadata": {
 		            "description": "The size of the Batch nodes"
 	    	    }
@@ -23,9 +23,16 @@
         },
         "poolId": {
             "type": "string",
-	          "defaultValue": "loadgen-MP-novnet",
+	          "defaultValue": "<<_POOL_ID_>>",
             "metadata": {
                 "description": "The pool ID "
+            }
+        },
+        "startTask": {
+            "type": "string",
+            "defaultValue": "/bin/bash -c 'run task here or /run/task/here.sh'",
+            "metadata": {
+                "description": "The task that will be run on all nodes joining the pool"
             }
         }
     },
@@ -35,12 +42,12 @@
             "id": "[parameters('poolId')]",
             "virtualMachineConfiguration": {
                 "imageReference": {
-                    "publisher": "OpenLogic",
-                    "offer": "CentOS",
-                    "sku": "7.4",
+                    "publisher": "<<_PUBLISHER_>>",
+                    "offer": "<<_OFFER_>>",
+                    "sku": "<<_SKU_>>",
                     "version": "latest"
                 },
-                "nodeAgentSKUId": "batch.node.centos 7"
+                "nodeAgentSKUId": "batch.node.<<_BATCH_NODE_AGENT_SKU_>>"
             },
             "vmSize": "[parameters('vmSize')]",
             "targetDedicatedNodes": "[parameters('dedicatedNodeCount')]",
@@ -54,12 +61,18 @@
         },
         "startTask": {
             "commandLine": "[parameters('startTask')]",
-            "resourceFiles": [],
+            "resourceFiles": [
+                {
+                    "blobSource": "<<_BLOB_SOURCE_>>",
+                    "filePath": "/tmp/startup.sh",
+                    "fileMode": "777"
+                }
+            ],
             "environmentSettings": [
               {
                 "name": "<<_ENV_VAR_>>",
                 "value": "<<_ENV_VAR_VALUE_>>"
-              },
+              }
             ],
         "userIdentity": {
             "autoUser": {

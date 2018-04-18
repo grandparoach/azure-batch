@@ -1,0 +1,64 @@
+{
+    "parameters": {
+        "jobId": {
+            "type": "string",
+            "defaultValue": "<<_JOB_ID_>>",
+            "metadata": {
+                "description": "The name of Azure Batch job"
+            }
+        },
+        "poolId": {
+            "type": "string",
+            "defaultValue": "<<_POOL_ID_>>",
+            "metadata": {
+                "description": "The name of Azure Batch pool which runs the job"
+            }
+        },
+        "repeatTaskCommand": {
+            "type": "string",
+            "defaultValue": "<<_REPEAT_TASK_>>",
+            "metadata": {
+                "description": "The name of Azure Batch pool which runs the job"
+            }
+        }
+    },
+    "job": {
+        "type": "Microsoft.Batch/batchAccounts/jobs",
+        "properties": {
+            "id": "[parameters('jobId')]",
+            "poolInfo": {
+                "poolId": "[parameters('poolId')]"
+            },
+            "taskFactory": {
+                "type": "taskPerFile",
+                "source": { 
+                    "fileGroup": "<<_BATCH_INPUT_FILEGROUP_>>"
+                },
+                "repeatTask": {
+                    "commandLine": "[parameters('repeatTaskCommand')]",
+                    "resourceFiles": [
+                        {
+                            "blobSource": "{url}",
+                            "filePath": "{fileName}"
+                        }
+                    ],
+                    "outputFiles": [
+                        {
+                            "filePattern": "{fileName}.output",
+                            "destination": {
+                                "autoStorage": {
+                                    "path": "{fileName}.output",
+                                    "fileGroup": "<<_BATCH_OUTPUT_FILEGROUP_>>"
+                                }
+                            },
+                            "uploadOptions": {
+                                "uploadCondition": "TaskSuccess"
+                            }
+                        }
+                    ]
+                }
+            },
+            "onAllTasksComplete": "terminatejob"
+        }
+    }
+}

@@ -66,7 +66,13 @@
             },
         "startTask": {
             "commandLine": "[parameters('startTask')]",
-            "resourceFiles": [],
+            "resourceFiles": [
+                {
+                    "blobSource": "<<_BLOB_SOURCE_>>",
+                    "filePath": "/tmp/startup.sh",
+                    "fileMode": "777"
+                }
+            ],
             "environmentSettings": [
               {
                 "name": "<<_ENV_VAR_>>",

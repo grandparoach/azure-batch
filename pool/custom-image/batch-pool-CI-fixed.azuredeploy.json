@@ -4,15 +4,15 @@
 	          "type": "string",
 	          "defaultValue": "<<_VM_SIZE_>>",
 	          "metadata": {
-		            "description": "The size of the Batch nodes"
-	           }
+		        "description": "The size of the Batch nodes"
+	        }
 	      },
         "vmId": {
           "type": "string",
           "defaultValue": "/subscriptions/<_ID_>/resourceGroups/<_RG_>/providers/Microsoft.Compute/images/<_IMAGE_>",
           "metadata": {
-            "description": "ID of the custom image that will be used for compute nodes in the pool"
-          }
+                "description": "ID of the custom image that will be used for compute nodes in the pool"
+            }
         },
         "dedicatedNodeCount": {
             "type": "int",
@@ -32,8 +32,8 @@
 	          "type": "int",
 	          "defaultValue": 8,
 	          "metadata": {
-		            "description": "The number of tasks that will be assigned to each compute node"
-	          }
+		        "description": "The number of tasks that will be assigned to each compute node"
+	        }
 	      },
         "poolId": {
             "type": "string",
@@ -41,15 +41,8 @@
             "metadata": {
                 "description": "The name of the pool being created"
             }
-        },
-	      "startTask": {
-	          "type": "string",
-	          "defaultValue": "/bin/bash -c 'run task here or /run/task/here.sh",
-	          "metadata": {
-		            "description": "The task that will be run on all nodes joining the pool"
-	          }
-	      }
-  },
+        }
+    },
     "pool": {
         "type": "Microsoft.Batch/batchAccounts/pools",
       "properties": {
@@ -57,8 +50,8 @@
         "virtualMachineConfiguration": {
           "imageReference": {
             "virtualMachineImageId": "[parameters('vmId')]"
-          },
-          "nodeAgentSKUId": "batch.node.centos 7"
+        },
+          "nodeAgentSKUId": "batch.node.<<_BATCH_NODE_AGENT_SKU_>>"
         },
         "vmSize": "[parameters('vmSize')]",
         "targetDedicatedNodes": "[parameters('dedicatedNodeCount')]",
@@ -68,11 +61,8 @@
         "maxTasksPerNode": "[parameters('maxTasksPerNode')]",
         "interNodeCommunication": false,
         "networkConfiguration": {
-          "subnetId": "/subscriptions/ed4e9e4f-9d3d-450e-8733-28a7d81cc5a4/resourceGroups/lustretest02/providers/Microsoft.Network/virtualNetworks/lustre-vnet/subnets/subnet-lustre-clients"
-        }
-      },
-	      "startTask": {
-            "commandLine": "[parameters('startTask')]"
+          "subnetId": "<<_SUBNET_ID_>>"
+            }   
         }
     }
 }

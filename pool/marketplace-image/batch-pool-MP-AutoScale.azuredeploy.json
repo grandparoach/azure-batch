@@ -34,6 +34,13 @@
             "metadata": {
                 "description": "The task that will be run on all nodes joining the pool"
             }
+        },
+        "blobSource": {
+            "type": "string",
+            "defaultValue": "https://utcnorescobatchsa.blob.core.windows.net/installation/utcnoresco-startupcsi.sh",
+            "metadata": {
+                "description": "The URL of the resource file blob to be downloaded as part of the startup task"
+            }
         }
     },
     "pool": {
@@ -50,24 +57,23 @@
                 "nodeAgentSKUId": "batch.node.<<_BATCH_NODE_AGENT_SKU_>>"
             },
             "vmSize": "[parameters('vmSize')]",
-            "targetDedicatedNodes": "[parameters('dedicatedNodeCount')]",
-            "targetLowPriorityNodes": "[parameters('lowPriNodeCount')]",
+            "targetDedicatedNodes": "0",
+            "targetLowPriorityNodes": "0",
 	          "nodeFillType": "spread",
             "enableAutoScale": true,
             "autoScaleFormula": "[parameters('autoScaleFormula')]",
             "autoScaleEvaluationInterval": "PT5M",
             "maxTasksPerNode": "[parameters('maxTasksPerNode')]",
-	          "interNodeCommunication": false
-        },
-        "startTask": {
-            "commandLine": "[parameters('startTask')]",
-            "resourceFiles": [
-                {
-                    "blobSource": "<<_BLOB_SOURCE_>>",
+	          "interNodeCommunication": false,
+            "startTask": {
+                "commandLine": "[parameters('startTask')]",
+                "resourceFiles": [
+                    {
+                    "blobSource": "[parameters('blobSource')]",
                     "filePath": "/tmp/startup.sh",
                     "fileMode": "777"
-                }
-            ],
+                    }
+                ],
             "environmentSettings": [
               {
                 "name": "<<_ENV_VAR_>>",

@@ -23,7 +23,7 @@
         },
       	"maxTasksPerNode": {
       	    "type": "int",
-      	    "defaultValue": 0,
+      	    "defaultValue": <<_MAX_TASKS_PER_NODE_>>,
       	    "metadata": {
       		      "description": "The number of tasks that will be assigned to each compute node"
       	    }
@@ -35,11 +35,11 @@
                 "description": "The name of the pool being created"
             }
         },
-        "startTask": {
+        "blobSource": {
             "type": "string",
-            "defaultValue": "/bin/bash -c 'run task here or /run/task/here.sh'",
+            "defaultValue": "<<_NODE-SETUP-SCRIPT_BLOB_URI_>>",
             "metadata": {
-                "description": "The task that will be run on all nodes joining the pool"
+                "description": "The URL of the resource file blob to be downloaded as part of the startup task"
             }
         }
     },
@@ -49,44 +49,48 @@
             "id": "[parameters('poolId')]",
             "virtualMachineConfiguration": {
                 "imageReference": {
-                    "publisher": "OpenLogic",
-                    "offer": "CentOS",
-                    "sku": "7.4",
+                    "publisher": "Canonical",
+                    "offer": "UbuntuServer",
+                    "sku": "14.04.5-LTS",
                     "version": "latest"
                 },
-                "nodeAgentSKUId": "batch.node.centos 7"
+                "nodeAgentSKUId": "batch.node.ubuntu 14.04"
             },
             "vmSize": "[parameters('vmSize')]",
             "targetDedicatedNodes": "[parameters('dedicatedNodeCount')]",
             "targetLowPriorityNodes": "[parameters('lowPriNodeCount')]",
-	        "nodeFillType": "pack",
+	        "nodeFillType": "spread",
             "enableAutoScale": false,
             "maxTasksPerNode": "[parameters('maxTasksPerNode')]",
             "interNodeCommunication": false,
             "startTask": {
                 "commandLine": "[parameters('startTask')]",
                 "resourceFiles": [
-                        {
-                        "blobSource": "<<_BLOB_SOURCE_>>",
-                        "filePath": "/tmp/startup.sh",
-                        "fileMode": "777"
-                        }
+                    {
+                    "blobSource": "[parameters('blobSource')]",
+                    "filePath": "/mnt/batch/tasks/startup/node-setup.sh",
+                    "fileMode": "777"
+                    }
                 ],
                 "environmentSettings": [
                     {
-                    "name": "<<_ENV_VAR_>>",
-                    "value": "<<_VALUE_>>"
-                    }
+                        "name": "APP_INSIGHTS_APP_ID",
+                        "value": "<<_ID_VALUE_>>"
+                      },
+                      {
+                        "name": "APP_INSIGHTS_INSTRUMENTATION_KEY",
+                        "value": "<<_KEY_VALUE_>>"
+                      }
                 ],
                 "userIdentity": {
                     "autoUser": {
                         "scope": "pool",
                         "elevationLevel": "admin"
-                        }
-                    },
-                "maxTaskRetryCount": 0,
-                "waitForSuccess": true
+                    }
+                },
+            "maxTaskRetryCount": 0,
+            "waitForSuccess": true
             }
-        } 
-    }
-}   
+        }
+    } 
+}

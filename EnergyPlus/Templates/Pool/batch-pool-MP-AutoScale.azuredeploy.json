@@ -1,0 +1,82 @@
+{
+    "parameters": {
+	      "vmSize": {
+	        "type": "string",
+      	    "defaultValue": "<<_VM_SIZE_>>",
+      	    "metadata": {
+		        "description": "The size of the Batch nodes"
+	    	    }
+	    },
+      	"maxTasksPerNode": {
+    	    "type": "int",
+    	    "defaultValue": <<_MAX_TASKS_PER_NODE_>>,
+    	    "metadata": {
+    	        "description": "The number of tasks that will be assigned to each compute node"
+    	      }
+        },
+        "poolId": {
+            "type": "string",
+	        "defaultValue": "<<_POOL_NAME_>>",
+            "metadata": {
+                "description": "The pool ID "
+            }
+        },
+        "blobSource": {
+            "type": "string",
+            "defaultValue": "<<_NODE-SETUP-SCRIPT_BLOB_URI_>>",
+            "metadata": {
+                "description": "The URL of the resource file blob to be downloaded as part of the startup task"
+            }
+        }
+    },
+    "pool": {
+        "type": "Microsoft.Batch/batchAccounts/pools",
+        "properties": {
+            "id": "[parameters('poolId')]",
+            "virtualMachineConfiguration": {
+                "imageReference": {
+                    "publisher": "Canonical",
+                    "offer": "UbuntuServer",
+                    "sku": "14.04.5-LTS",
+                    "version": "latest"
+                },
+                "nodeAgentSKUId": "batch.node.ubuntu 14.04"
+            },
+            "vmSize": "[parameters('vmSize')]",
+	        "nodeFillType": "spread",
+            "enableAutoScale": true,
+            "autoScaleFormula": "percentage = 70;\nspan = TimeInterval_Minute * 5;\n$samples = $ActiveTasks.GetSamplePercent(span);\n$tasks = $samples < percentage ? max(0,$ActiveTasks.GetSample(1)) : max( $ActiveTasks.GetSample(1), avg($ActiveTasks.GetSample(span)));\nmultiplier = 0.25;\n$cores = $TargetDedicated * 4;\n$extraVMs = (($tasks - $cores) + 3) * multiplier;\n$targetVMs = ($TargetDedicated + $extraVMs);\n$TargetDedicated = max(0, min($targetVMs, 10));\n$NodeDeallocationOption = taskcompletion;",
+            "autoScaleEvaluationInterval": "PT5M",
+            "maxTasksPerNode": "[parameters('maxTasksPerNode')]",
+	        "interNodeCommunication": false,
+            "startTask": {
+                "commandLine": "[parameters('startTask')]",
+                "resourceFiles": [
+                    {
+                    "blobSource": "[parameters('blobSource')]",
+                    "filePath": "/mnt/batch/tasks/startup/node-setup.sh",
+                    "fileMode": "777"
+                    }
+                ],
+                "environmentSettings": [
+                    {
+                        "name": "APP_INSIGHTS_APP_ID",
+                        "value": "<<_ID_VALUE_>>"
+                      },
+                      {
+                        "name": "APP_INSIGHTS_INSTRUMENTATION_KEY",
+                        "value": "<<_KEY_VALUE_>>"
+                      }
+                ],
+                "userIdentity": {
+                    "autoUser": {
+                        "scope": "pool",
+                        "elevationLevel": "admin"
+                    }
+                },
+            "maxTaskRetryCount": 0,
+            "waitForSuccess": true
+            } 
+        }
+    }
+}

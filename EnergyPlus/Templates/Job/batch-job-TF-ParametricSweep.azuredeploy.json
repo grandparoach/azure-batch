@@ -1,0 +1,45 @@
+{
+    "parameters": {
+        "jobId": {
+            "type": "string",
+            "defaultValue": "<<_JOB_NAME_>>"
+        },
+        "poolId": {
+            "type": "string",
+            "defaultValue": "<<_POOL_NAME_>>"
+        },
+        "blobSource": {
+            "type": "string",
+            "defaultValue": "<<_BUILD-TASK-SCRIPT_BLOB_URI_>>"
+        }
+    },
+    "job": {
+        "type": "Microsoft.Batch/batchAccounts/jobs",
+        "properties": {
+            "id": "[parameters('jobId')]",
+            "poolInfo": {
+                "poolId": "[parameters('poolId')]"
+            },
+            "taskFactory": {
+                "type": "parametricSweep",
+                "parameterSets": [
+                    {
+                        "start": <<_START_>>,
+                        "end": <<_END_>>,
+                        "step": <<_STEP_>>
+                    }
+                ],
+                "repeatTask": {
+                  "commandLine": "/bin/bash -c '/mnt/batch/tasks/shared/build-task.sh {0}'",
+                  "resourceFiles": [
+                    {
+                    "blobSource": "[parameters('blobSource')]",
+                    "filePath": "/mnt/batch/tasks/shared/build-task.sh",
+                    "fileMode": "777"
+                    }
+                ],
+                }
+            }
+        }
+    }
+}

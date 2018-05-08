@@ -1,45 +1,31 @@
 {
     "parameters": {
 	      "vmSize": {
-	      "type": "string",
-	      "defaultValue": "<<_VM_SIZE_>>",
-	      "metadata": {
-		        "description": "The size of the Batch nodes"
-	    	}
-	  },
-        "dedicatedNodeCount": {
-            "type": "int",
-	          "defaultValue": 0,
-            "metadata": {
-                "description": "The number of dedicated pool nodes"
-            }
-        },
-	      "lowPriNodeCount": {
-            "type": "int",
-            "defaultValue": 0,
-            "metadata": {
-                "description": "The number of Low Priority pool nodes"
-            }
-        },
-      	"maxTasksPerNode": {
-      	    "type": "int",
-      	    "defaultValue": <<_MAX_NUMBER_OF_TASKS_PER_NODE_>>,
+	        "type": "string",
+      	    "defaultValue": "Standard_F2",
       	    "metadata": {
-      		      "description": "The number of tasks that will be assigned to each compute node"
-      	    }
-      	},
+		        "description": "The size of the Batch nodes"
+	    	    }
+	    },
+      	"maxTasksPerNode": {
+    	    "type": "int",
+    	    "defaultValue": 4,
+    	    "metadata": {
+    	        "description": "The number of tasks that will be assigned to each compute node"
+    	      }
+        },
         "poolId": {
             "type": "string",
-	          "defaultValue": "<<_POOL_NAME_>>",
+	        "defaultValue": "EnergyPlus_Pool--FinalTest_Auto",
             "metadata": {
-                "description": "The name of the pool being created"
+                "description": "The pool ID "
             }
         },
         "blobSource": {
             "type": "string",
-            "defaultValue": "<<_URI_FOR_NODE-SETUP.SH_>>",
+            "defaultValue": "https://utcnorescobatchsa.blob.core.windows.net/installation/node-setup.sh",
             "metadata": {
-                "description": "The node setup script task that will be downloaded & run on all nodes joining the pool"
+                "description": "The URL of the resource file blob to be downloaded as part of the startup task"
             }
         }
     },
@@ -57,12 +43,12 @@
                 "nodeAgentSKUId": "batch.node.ubuntu 14.04"
             },
             "vmSize": "[parameters('vmSize')]",
-            "targetDedicatedNodes": "[parameters('dedicatedNodeCount')]",
-            "targetLowPriorityNodes": "[parameters('lowPriNodeCount')]",
 	        "nodeFillType": "spread",
-            "enableAutoScale": false,
+            "enableAutoScale": true,
+            "autoScaleFormula": "percentage = 70;\nspan = TimeInterval_Minute * 5;\n$samples = $ActiveTasks.GetSamplePercent(span);\n$tasks = $samples < percentage ? max(0,$ActiveTasks.GetSample(1)) : max( $ActiveTasks.GetSample(1), avg($ActiveTasks.GetSample(span)));\nmultiplier = 0.25;\n$cores = $TargetDedicated * 4;\n$extraVMs = (($tasks - $cores) + 3) * multiplier;\n$targetVMs = ($TargetDedicated + $extraVMs);\n$TargetDedicated = max(0, min($targetVMs, 10));\n$NodeDeallocationOption = taskcompletion;",
+            "autoScaleEvaluationInterval": "PT5M",
             "maxTasksPerNode": "[parameters('maxTasksPerNode')]",
-            "interNodeCommunication": false,
+	        "interNodeCommunication": false,
             "startTask": {
                 "commandLine": "/bin/bash -c '/mnt/batch/tasks/startup/node-setup.sh'",
                 "resourceFiles": [
@@ -75,22 +61,22 @@
                 "environmentSettings": [
                     {
                         "name": "APP_INSIGHTS_APP_ID",
-                        "value": "<<_APP_INSIGHTS_APP_ID_VALUE_>>"
+                        "value": "1a951d15-63a2-483b-955a-b537211c1f98"
                       },
                       {
                         "name": "APP_INSIGHTS_INSTRUMENTATION_KEY",
-                        "value": "<<_APP_INSIGHTS_INSTRUMENTATION_KEY_VALUE_>>"
+                        "value": "4630f102-4e0d-4cf3-b401-e6e41a1db351"
                       }
                 ],
                 "userIdentity": {
-                "autoUser": {
-                    "scope": "pool",
-                    "elevationLevel": "admin"
+                    "autoUser": {
+                        "scope": "pool",
+                        "elevationLevel": "admin"
                     }
                 },
-                "maxTaskRetryCount": 0,
-                "waitForSuccess": true
-            }
+            "maxTaskRetryCount": 0,
+            "waitForSuccess": true
+            } 
         }
-    } 
+    }
 }

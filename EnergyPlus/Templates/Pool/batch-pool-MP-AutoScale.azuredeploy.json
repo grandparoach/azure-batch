@@ -9,7 +9,7 @@
 	    },
       	"maxTasksPerNode": {
     	    "type": "int",
-    	    "defaultValue": <<_MAX_TASKS_PER_NODE_>>,
+    	    "defaultValue": <<_MAX_NUMBER_OF_TASKS_PER_NODE_>>,
     	    "metadata": {
     	        "description": "The number of tasks that will be assigned to each compute node"
     	      }
@@ -23,7 +23,7 @@
         },
         "blobSource": {
             "type": "string",
-            "defaultValue": "<<_NODE-SETUP-SCRIPT_BLOB_URI_>>",
+            "defaultValue": "<<_URI_FOR_NODE-SETUP.SH_>>",
             "metadata": {
                 "description": "The URL of the resource file blob to be downloaded as part of the startup task"
             }
@@ -50,7 +50,7 @@
             "maxTasksPerNode": "[parameters('maxTasksPerNode')]",
 	        "interNodeCommunication": false,
             "startTask": {
-                "commandLine": "[parameters('startTask')]",
+                "commandLine": "/bin/bash -c '/mnt/batch/tasks/startup/node-setup.sh'",
                 "resourceFiles": [
                     {
                     "blobSource": "[parameters('blobSource')]",
@@ -61,11 +61,11 @@
                 "environmentSettings": [
                     {
                         "name": "APP_INSIGHTS_APP_ID",
-                        "value": "<<_ID_VALUE_>>"
+                        "value": "<<_APP_INSIGHTS_APP_ID_VALUE_>>"
                       },
                       {
                         "name": "APP_INSIGHTS_INSTRUMENTATION_KEY",
-                        "value": "<<_KEY_VALUE_>>"
+                        "value": "<<_APP_INSIGHTS_INSTRUMENTATION_KEY_VALUE_>>"
                       }
                 ],
                 "userIdentity": {

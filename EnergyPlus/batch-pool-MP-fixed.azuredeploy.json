@@ -2,7 +2,7 @@
     "parameters": {
 	      "vmSize": {
 	      "type": "string",
-	      "defaultValue": "<<_VM_SIZE_>>",
+	      "defaultValue": "standard_F2",
 	      "metadata": {
 		        "description": "The size of the Batch nodes"
 	    	}
@@ -16,28 +16,28 @@
         },
 	      "lowPriNodeCount": {
             "type": "int",
-            "defaultValue": 0,
+            "defaultValue": 4,
             "metadata": {
                 "description": "The number of Low Priority pool nodes"
             }
         },
       	"maxTasksPerNode": {
       	    "type": "int",
-      	    "defaultValue": <<_MAX_NUMBER_OF_TASKS_PER_NODE_>>,
+      	    "defaultValue": 4,
       	    "metadata": {
       		      "description": "The number of tasks that will be assigned to each compute node"
       	    }
       	},
         "poolId": {
             "type": "string",
-	          "defaultValue": "<<_POOL_NAME_>>",
+	          "defaultValue": "EnergyPlus_Pool--Final",
             "metadata": {
                 "description": "The name of the pool being created"
             }
         },
         "blobSource": {
             "type": "string",
-            "defaultValue": "<<_URI_FOR_NODE-SETUP.SH_>>",
+            "defaultValue": "https://utcnorescobatchsa.blob.core.windows.net/installation/node-setup.sh",
             "metadata": {
                 "description": "The node setup script task that will be downloaded & run on all nodes joining the pool"
             }
@@ -75,11 +75,11 @@
                 "environmentSettings": [
                     {
                         "name": "APP_INSIGHTS_APP_ID",
-                        "value": "<<_APP_INSIGHTS_APP_ID_VALUE_>>"
+                        "value": "1a951d15-63a2-483b-955a-b537211c1f98"
                       },
                       {
                         "name": "APP_INSIGHTS_INSTRUMENTATION_KEY",
-                        "value": "<<_APP_INSIGHTS_INSTRUMENTATION_KEY_VALUE_>>"
+                        "value": "4630f102-4e0d-4cf3-b401-e6e41a1db351"
                       }
                 ],
                 "userIdentity": {

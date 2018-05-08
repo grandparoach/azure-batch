@@ -2,23 +2,16 @@
     "parameters": {
         "jobId": {
             "type": "string",
-            "defaultValue": "<<_JOB_NAME_>>",
+            "defaultValue": "EnergyPlus_ParametricSweep--FinalTest_fixed",
             "metadata": {
                 "description": "The unique identifier of the job."
             }
         },
         "poolId": {
             "type": "string",
-            "defaultValue": "<<_POOL_NAME_>>",
+            "defaultValue": "EnergyPlus_Pool--FinalTest_Fixed",
             "metadata": {
                 "description": "The ID of the pool on which to run the job."
-            }
-        },
-        "blobSource": {
-            "type": "string",
-            "defaultValue": "<<_URI_FOR_BUILD-TASK.SH_>>",
-            "metadata": {
-                "description": "The script downloaded to create the task structures on each node."
             }
         }
     },
@@ -33,16 +26,16 @@
                 "type": "parametricSweep",
                 "parameterSets": [
                     {
-                        "start": <<_START_>>,
-                        "end": <<_END_>>,
-                        "step": <<_STEP/INTERVAL_>>
+                        "start": 1,
+                        "end": 55,
+                        "step": 1
                     }
                 ],
                 "repeatTask": {
                     "commandLine": "/bin/bash -c 'sleep 5; /mnt/batch/tasks/shared/build-task.sh {0}'",
                     "resourceFiles": [
                         {
-                        "blobSource": "[parameters('blobSource')]",
+                        "blobSource": "https://utcnorescobatchsa.blob.core.windows.net/installation/build-task.sh",
                         "filePath": "/mnt/batch/tasks/shared/build-task.sh",
                         "fileMode": "777"
                         }

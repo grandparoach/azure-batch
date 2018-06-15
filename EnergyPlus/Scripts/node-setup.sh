@@ -24,7 +24,7 @@ then
 fi
 
 ### Mount the remote filesystem to $MOUNT specified above:
-"{ <<_FILE_SHARE_MOUNT_COMMAND_>> }"
+FILE_SHARE_MOUNT_COMMAND
 
 ### Install EnergyPlus software from remote filesystem if the command 'energyplus' doesn't exist:
 if ! command -v energyplus >> /dev/null

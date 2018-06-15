@@ -1,0 +1,104 @@
+{
+    "parameters": {
+        "poolId": {
+            "type": "string",
+            "defaultValue": "<<_POOL_NAME_>>",
+            "metadata": {
+                "description": "The ID of the pool on which to run the job."
+            }
+        },
+        "jobName": {
+            "type": "string",
+            "defaultValue": "<<_JOB_NAME_>>",
+            "metadata": {
+                "description": "The prefix of the name of the Azure Batch job, also used to prefix rendered outputs"
+            }
+        },
+         "inputData": {
+            "type": "string",
+            "defaultValue": "<<_INPUT_FILE_GROUP_>>",
+            "metadata": {
+                "description": "The file group where the input data is stored",
+                "advancedType": "file-group"
+            }
+        },
+        "outputs": {
+            "type": "string",
+            "defaultValue": "<<_OUTPUT_FILE_GROUP_>>",
+            "metadata": {
+                "description": "The file group where outputs will be stored",
+                "advancedType": "file-group"
+            }
+        }
+    },
+    "job": {
+        "type": "Microsoft.Batch/batchAccounts/jobs",
+        "properties": {
+            "id": "[parameters('jobName')]",
+            "poolInfo": {
+                "poolId": "[parameters('poolId')]"
+            },
+            "onAllTasksComplete": "terminateJob",
+            "jobPreparationTask":{
+                "userIdentity": {
+                    "autoUser": {
+                        "scope": "pool",
+                        "elevationLevel": "admin"
+                    }
+                },
+                "commandLine": "/bin/bash -c 'apt-get install -y python-pip;python -m pip install -U pip;apt-get update;python -m pip install azure-batch;sudo -H python -m pip install requests urllib3 --force --upgrade --ignore-installed'"
+            },
+            "jobManagerTask":{
+                "id": "0-manager",
+                "displayName": "job manager task",
+                "allowLowPriorityNode" : true,
+                "runExclusive": true,
+                "authenticationTokenSettings":{
+                    "access": ["job"]
+                },
+                "userIdentity": {
+                    "autoUser": {
+                        "scope": "pool",
+                        "elevationLevel": "admin"
+                    }
+                },
+                "commandLine": "/bin/bash -c 'env;python $AZ_BATCH_TASK_WORKING_DIR/assets/process-manifest.py'",
+                "killJobOnCompletion": false,
+                "resourceFiles": [
+                    {
+                        "source": {
+                            "fileGroup": "[parameters('inputData')]"
+                        },
+                        "filePath": "assets/"
+                    }
+                ],
+                "outputFiles": [
+                    {
+                        "filePattern": "../stdout.txt",
+                        "destination": {
+                            "autoStorage": {
+                                "fileGroup": "[parameters('outputs')]",
+                                "path": "[parameters('jobName')]/logs/manager/stdout.txt"
+                            }
+                        },
+                        "uploadOptions": {
+                            "uploadCondition": "taskCompletion"
+                        }
+                    },
+                    {
+                        "filePattern": "../stderr.txt",
+                        "destination": {
+                            "autoStorage": {
+                                "fileGroup": "[parameters('outputs')]",
+                                "path": "[parameters('jobName')]/logs/manager/stderr.txt"
+                            }
+                        },
+                        "uploadOptions": {
+                            "uploadCondition": "taskCompletion"
+                        }
+                    }
+                ]
+            }
+        }
+    }
+}

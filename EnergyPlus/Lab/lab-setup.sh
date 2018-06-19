@@ -24,7 +24,7 @@ mkdir -p ${LABDIR}
 touch $LOG; date >> $LOG
 
 UNIQUE_STRING=$(hexdump -e '/1 "%02x"' -n3 < /dev/urandom) # Random string for naming suffix
-RGNAME="AzureBatch-EnergyPlus-Lab-$UNIQUE_STRING" # Resource Group name
+RGNAME="AzureBatch-EnergyPlus-Lab-${UNIQUE_STRING}" # Resource Group name
 SANAME="azbep${UNIQUE_STRING}" # Storage Account name
 BANAME="azbep${UNIQUE_STRING}" # Batch Account name
 
@@ -54,15 +54,15 @@ BRK
 
 echo "Downloading the required input files for the EnergyPlus application from https://aka.ms/EnergyPlus-inputs:"
 wget -O ${LABDIR}/EnergyPlus-inputs.tar.gz https://aka.ms/EnergyPlus-inputs >> $LOG 2>&1
-if find $LABDIR -name "EnergyPlus-inputs.tar.gz" >> /dev/null
+if find ${LABDIR} -name "EnergyPlus-inputs.tar.gz" >> /dev/null
 then echo -e "Done"
 else echo -e "Inputs tarball not found - exiting...\n\n"; exit 1
 fi
 BRK
 
 LSP
-echo "Extracting the tarball to $LABDIR:"
-tar -xvf ${LABDIR}/EnergyPlus-inputs.tar.gz -C $LABDIR >> $LOG
+echo "Extracting the tarball to ${LABDIR}:"
+tar -xvf ${LABDIR}/EnergyPlus-inputs.tar.gz -C ${LABDIR} >> $LOG
 echo "Done"
 BRK
 
@@ -125,6 +125,12 @@ BRK
 
 LSP
 echo "Using AzCopy to stage the EnergyPlus input files into the Azure File share:"
+if ! command -v azcopy > /dev/null
+then read -p "AzCopy is not installed - holding in case installation will be done in parallel.
+
+Alternatively, hit CTRL+C to cancel this script run. This script will not automatically exit...
+"
+fi
 azcopy --source ${LABDIR}/EnergyPlus_input_files/ --destination ${SHARE_ENDPOINT} --dest-key $AZURE_STORAGE_KEY --recursive >> $LOG
 echo -e "Done"
 BRK

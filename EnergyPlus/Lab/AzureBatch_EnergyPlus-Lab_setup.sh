@@ -48,8 +48,8 @@ git clone https://github.com/grandparoach/azure-batch.git $LABDIR/azure-batch >>
 echo "Done - repository cloned to: $LABDIR"
 
 BRK
-echo -e "Performing authentication from the Azure CLI to resources & services:\n"
-az login -o table
+#echo -e "Performing authentication from the Azure CLI to resources & services:\n"
+#az login -o table
 BRK
 
 echo "Downloading the required input files for the EnergyPlus application from https://aka.ms/EnergyPlus-inputs:"
@@ -101,9 +101,11 @@ echo "Creating a Storage Account:"
 az storage account create --resource-group $RGNAME --name $SANAME --location $REGION --sku Standard_LRS --kind StorageV2 >> $LOG
 echo -e "Done\n"
 
-echo "Exporting the storage account name & storage account key as variables:"
+echo "Exporting the storage account name, storage account key, and SAS token as variables:"
 export AZURE_STORAGE_ACCOUNT=$SANAME
 export AZURE_STORAGE_KEY=$(az storage account keys list --account-name $SANAME --resource-group $RGNAME -o table | grep key1 | awk '{print $3}')
+end=`date -u -d "1 week" '+%Y-%m-%dT%H:%MZ'`
+export AZURE_STORAGE_SAS=$(az storage account generate-sas --permissions cdlruwap --account-name azbep495ef5 --services bf --resource-types sco --expiry $end --account-key $AZURE_STORAGE_KEY -o tsv)
 echo -e "Done\n"
 
 echo "Creating an Azure Files share:"
@@ -131,7 +133,7 @@ then read -p "AzCopy is not installed - holding in case installation will be don
 Alternatively, hit CTRL+C to cancel this script run. This script will not automatically exit...
 "
 fi
-azcopy --source ${LABDIR}/EnergyPlus_input_files/ --destination ${SHARE_ENDPOINT} --dest-key $AZURE_STORAGE_KEY --recursive >> $LOG
+azcopy copy ${LABDIR}/EnergyPlus_input_files/  "${SHARE_ENDPOINT}?${AZURE_STORAGE_SAS}" --recursive=true >> $LOG
 echo -e "Done"
 BRK
 

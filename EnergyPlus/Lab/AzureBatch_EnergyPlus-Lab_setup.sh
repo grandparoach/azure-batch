@@ -44,7 +44,7 @@ then
     elif command -v brew >> $LOG; then brew install git >> $LOG
     fi
 fi
-git clone https://github.com/whatsondoc/azure-batch.git $LABDIR/azure-batch >> $LOG 2>&1
+git clone https://github.com/grandparoach/azure-batch.git $LABDIR/azure-batch >> $LOG 2>&1
 echo "Done - repository cloned to: $LABDIR"
 
 BRK
@@ -68,7 +68,7 @@ BRK
 
 echo -e "Adding the Azure Batch CLI Extensions to the local Azure CLI environment:\n "
 if ! az extension list -o table | egrep 'cli-extensions|cli_extensions' >> $LOG
-then az extension add --source https://github.com/Azure/azure-batch-cli-extensions/releases/download/azure-batch-cli-extensions-2.2.2/azure_batch_cli_extensions-2.2.2-py2.py3-none-any.whl
+then az extension add --source https://github.com/Azure/azure-batch-cli-extensions/releases/download/azure-batch-cli-extensions-6.0.0/azure_batch_cli_extensions-6.0.0-py2.py3-none-any.whl
 else echo "Azure Batch CLI Extensions are already installed"
 fi
 BRK

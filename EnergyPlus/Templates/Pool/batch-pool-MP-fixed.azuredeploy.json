@@ -37,7 +37,7 @@
         },
         "blobSource": {
             "type": "string",
-            "defaultValue": "<<_URI_FOR_NODE-SETUP.SH_>>",
+            "defaultValue": <<_URI_FOR_NODE-SETUP.SH_>>,
             "metadata": {
                 "description": "The node setup script task that will be downloaded & run on all nodes joining the pool"
             }

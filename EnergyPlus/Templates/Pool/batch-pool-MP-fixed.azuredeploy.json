@@ -45,24 +45,26 @@
     },
     "pool": {
         "type": "Microsoft.Batch/batchAccounts/pools",
+	"apiVersion": "2020-03-01",
         "properties": {
             "id": "[parameters('poolId')]",
             "virtualMachineConfiguration": {
                 "imageReference": {
                     "publisher": "Canonical",
                     "offer": "UbuntuServer",
-                    "sku": "14.04.5-LTS",
+                    "sku": "16.04-LTS",
                     "version": "latest"
                 },
-                "nodeAgentSKUId": "batch.node.ubuntu 14.04"
+                "nodeAgentSKUId": "batch.node.ubuntu 16.04"
             },
             "vmSize": "[parameters('vmSize')]",
             "targetDedicatedNodes": "[parameters('dedicatedNodeCount')]",
             "targetLowPriorityNodes": "[parameters('lowPriNodeCount')]",
-	        "nodeFillType": "spread",
             "enableAutoScale": false,
             "maxTasksPerNode": "[parameters('maxTasksPerNode')]",
-            "interNodeCommunication": false,
+            "taskSchedulingPolicy": {
+                "nodeFillType": "spread"
+            },
             "startTask": {
                 "commandLine": "/bin/bash -c '/mnt/batch/tasks/startup/node-setup.sh'",
                 "resourceFiles": [
@@ -73,19 +75,11 @@
                     }
                 ],
                 "environmentSettings": [
-                    {
-                        "name": "APP_INSIGHTS_APP_ID",
-                        "value": "<<_APP_INSIGHTS_APP_ID_VALUE_>>"
-                      },
-                      {
-                        "name": "APP_INSIGHTS_INSTRUMENTATION_KEY",
-                        "value": "<<_APP_INSIGHTS_INSTRUMENTATION_KEY_VALUE_>>"
-                      }
                 ],
                 "userIdentity": {
                 "autoUser": {
                     "scope": "pool",
-                    "elevationLevel": "admin"
+                    "elevationLevel": "Admin"
                     }
                 },
                 "maxTaskRetryCount": 0,

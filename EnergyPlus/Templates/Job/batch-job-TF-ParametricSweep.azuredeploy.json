@@ -16,7 +16,7 @@
         },
         "blobSource": {
             "type": "string",
-            "defaultValue": "<<_URI_FOR_BUILD-TASK.SH_>>",
+            "defaultValue": <<_URI_FOR_BUILD-TASK.SH_>>,
             "metadata": {
                 "description": "The script downloaded to create the task structures on each node."
             }

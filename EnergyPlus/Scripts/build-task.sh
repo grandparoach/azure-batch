@@ -11,7 +11,7 @@ IDF=$(head -n $STEP /mnt/batch/tasks/shared/manifest.txt | tail -1 | awk '{ prin
 
 
 ### Creating a separate directory for each task's results to be stored in:
-RESULTS_DIR="$MOUNT/esim/results/$AZ_BATCH_JOB_ID/$STEP/$AZ_BATCH_TASK_ID"
+RESULTS_DIR="$MOUNT/EnergyPlus_input_files/esim/results/$AZ_BATCH_JOB_ID/$STEP/$AZ_BATCH_TASK_ID"
 if [ ! -d $RESULTS_DIR ]
 then 
     mkdir -p $RESULTS_DIR
@@ -19,5 +19,5 @@ fi
 
 
 ### Running the command:
-echo "energyplus -w $MOUNT/inputs/weather/${WEATHER} -d $RESULTS_DIR $MOUNT/esim/models/${IDF}"
-energyplus -w $MOUNT/inputs/weather/${WEATHER} -d $RESULTS_DIR $MOUNT/esim/models/${IDF}
+echo "energyplus -w $MOUNT/EnergyPlus_input_files/inputs/weather/${WEATHER} -d $RESULTS_DIR $MOUNT/EnergyPlus_input_files/esim/models/${IDF}"
+energyplus -w $MOUNT/EnergyPlus_input_files/inputs/weather/${WEATHER} -d $RESULTS_DIR $MOUNT/EnergyPlus_input_files/esim/models/${IDF}

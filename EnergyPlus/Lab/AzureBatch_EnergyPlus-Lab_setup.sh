@@ -12,7 +12,7 @@ echo -e "\n\n" >> $LOG
 }
 
 if ! command -v az >> /dev/null
-then 
+then
 echo -e "The Azure CLI is not installed - it is required for this script to run.\n\nPlease install it prior to re-running this script\n\n"
 exit 1
 fi
@@ -38,7 +38,7 @@ BRK
 
 echo "Cloning the GitHub repository for use with the Lab"
 if ! command -v git > /dev/null
-then 
+then
     if command -v yum >> $LOG; then sudo yum install git >> $LOG
     elif command -v apt-get >> $LOG; then sudo apt-get install git >> $LOG
     elif command -v brew >> $LOG; then brew install git >> $LOG
@@ -48,27 +48,17 @@ git clone https://github.com/grandparoach/azure-batch.git $LABDIR/azure-batch >>
 echo "Done - repository cloned to: $LABDIR"
 
 BRK
-#echo -e "Performing authentication from the Azure CLI to resources & services:\n"
-#az login -o table
-BRK
 
-echo "Downloading the required input files for the EnergyPlus application from https://aka.ms/EnergyPlus-inputs:"
-wget -O ${LABDIR}/EnergyPlus-inputs.tar.gz https://aka.ms/EnergyPlus-inputs >> $LOG 2>&1
-if find ${LABDIR} -name "EnergyPlus-inputs.tar.gz" >> /dev/null
-then echo -e "Done"
-else echo -e "Inputs tarball not found - exiting...\n\n"; exit 1
-fi
-BRK
 
 LSP
-echo "Extracting the tarball to ${LABDIR}:"
-tar -xvf ${LABDIR}/EnergyPlus-inputs.tar.gz -C ${LABDIR} >> $LOG
+echo "Extracting the input files tarball to ${LABDIR}:"
+tar -xvf ${LABDIR}/azure-batch/EnergyPlus/Lab/EnergyPlus_input_files.tar.gz -C ${LABDIR} >> $LOG
 echo "Done"
 BRK
 
 echo -e "Adding the Azure Batch CLI Extensions to the local Azure CLI environment:\n "
 if ! az extension list -o table | egrep 'cli-extensions|cli_extensions' >> $LOG
-then az extension add --source https://github.com/Azure/azure-batch-cli-extensions/releases/download/azure-batch-cli-extensions-6.0.0/azure_batch_cli_extensions-6.0.0-py2.py3-none-any.whl
+then az extension add --name azure-batch-cli-extensions
 else echo "Azure Batch CLI Extensions are already installed"
 fi
 BRK
@@ -80,10 +70,10 @@ do
     echo ""
     read -p "Please specify the region to use for this Lab: " REGION
     if [[ $(az account list-locations --query "[*].name" -o tsv | grep -w $REGION) ]]
-    then 
-	RGLOCVALID="true"
-	LSP
-	echo -e "\nValid region specified: using $REGION for the Lab environment" 
+    then
+        RGLOCVALID="true"
+        LSP
+        echo -e "\nValid region specified: using $REGION for the Lab environment"
     fi
 done
 BRK
@@ -105,7 +95,7 @@ echo "Exporting the storage account name, storage account key, and SAS token as 
 export AZURE_STORAGE_ACCOUNT=$SANAME
 export AZURE_STORAGE_KEY=$(az storage account keys list --account-name $SANAME --resource-group $RGNAME -o table | grep key1 | awk '{print $3}')
 end=`date -u -d "1 week" '+%Y-%m-%dT%H:%MZ'`
-export AZURE_STORAGE_SAS=$(az storage account generate-sas --permissions cdlruwap --account-name azbep495ef5 --services bf --resource-types sco --expiry $end --account-key $AZURE_STORAGE_KEY -o tsv)
+export AZURE_STORAGE_SAS=$(az storage account generate-sas --permissions cdlruwap --account-name $SANAME --services bf --resource-types sco --https-only --expiry $end --account-key $AZURE_STORAGE_KEY -o tsv)
 echo -e "Done\n"
 
 echo "Creating an Azure Files share:"
@@ -133,12 +123,14 @@ then read -p "AzCopy is not installed - holding in case installation will be don
 Alternatively, hit CTRL+C to cancel this script run. This script will not automatically exit...
 "
 fi
-azcopy copy ${LABDIR}/EnergyPlus_input_files/  "${SHARE_ENDPOINT}?${AZURE_STORAGE_SAS}" --recursive=true >> $LOG
+export DESTINATION_URL=${SHARE_ENDPOINT}/?${AZURE_STORAGE_SAS}
+azcopy copy ${LABDIR}/EnergyPlus_input_files  ${DESTINATION_URL} --recursive=true >> $LOG
 echo -e "Done"
 BRK
 
 echo "Updating the node-setup.sh script:"
-sed -i "s%FILE_SHARE_MOUNT_COMMAND%sudo mount -t cifs //$SANAME.file.core.windows.net/energyplus /mnt/energyplus -o vers=3.0,username=$SANAME,password=$STORAGE_ACCOUNT_KEY,dir_mode=0777,file_mode=0777,sec=ntlmssp%g" ${LABDIR}/azure-batch/EnergyPlus/Scripts/node-setup.sh
+sed -i "s%<<SANAME>>%$SANAME%g" ${LABDIR}/azure-batch/EnergyPlus/Scripts/node-setup.sh
+sed -i "s%<<SAKEY>>%$AZURE_STORAGE_KEY%g" ${LABDIR}/azure-batch/EnergyPlus/Scripts/node-setup.sh
 echo "Done"
 
 BRK

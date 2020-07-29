@@ -31,7 +31,7 @@ sudo mkdir /etc/smbcredentials
 fi
 if [ ! -f "/etc/smbcredentials/<<SANAME>>.cred" ]; then
     sudo bash -c 'echo "username=<<SANAME>>" >> /etc/smbcredentials/<<SANAME>>.cred'
-    sudo bash -c 'echo "password=<<SAKEY>> >> /etc/smbcredentials/<<SANAME>>.cred'
+    sudo bash -c 'echo "password=<<SAKEY>>" >> /etc/smbcredentials/<<SANAME>>.cred'
 fi
 sudo chmod 600 /etc/smbcredentials/<<SANAME>>.cred
 

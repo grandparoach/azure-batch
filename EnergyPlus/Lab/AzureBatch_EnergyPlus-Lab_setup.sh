@@ -17,7 +17,7 @@ echo -e "The Azure CLI is not installed - it is required for this script to run.
 exit 1
 fi
 
-LABDIR=~/AzureBatch/EnergyPlus-Lab
+LABDIR=~/clouddrive
 LOG="${LABDIR}/env-setup.log"
 
 mkdir -p ${LABDIR}
@@ -177,4 +177,3 @@ echo "Closing LOG entries - the Lab environment is setup
 
 " >> $LOG
 echo -e "Environment setup complete.\n\nPlease proceed with Step 2 from the associated Lab guide."
-BRK
